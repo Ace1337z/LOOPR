@@ -181,6 +181,50 @@ writable by anyone who can update their own profile row.
 test suite can exercise the algorithm without a live database. Change one, change
 the other.
 
+## Getting an APK for testers
+
+There is no APK in the repo on purpose — binaries do not belong in git. Build one
+with EAS Build, which compiles in the cloud, so no Android Studio or Xcode is
+needed.
+
+**One-time setup:**
+
+```bash
+npm install -g eas-cli
+eas login
+eas build:configure        # writes build IDs into app.json
+```
+
+**Android APK** — this is the one you want. `apk` installs on any device with
+"unknown sources" enabled, no Play Store needed:
+
+```bash
+eas build --platform android --profile preview
+```
+
+That prints a QR code and a download link. Anyone with the link can install it.
+
+**iOS** — needs a paid Apple Developer account. Builds are signed, so each
+tester's device UDID must be registered. Use EAS internal distribution, which
+handles the Ad Hoc certificates for you, then share the link it gives you.
+
+**Sharing with testers:** send them the link from EAS, or run
+`eas build:run -p android --latest` to install straight onto a connected device.
+
+**Important:** a `preview` build bakes your `EXPO_PUBLIC_*` values into the
+binary at build time. Rebuild the APK whenever you change them, or the app will
+keep using the old ones. `.env` is gitignored, so a fresh clone has no keys and
+will render nothing until you add them.
+
+**Expo Go cannot run this app.** It uses native tabs
+(`expo-router/unstable-native-tabs`), which is a native module, so it needs a
+development build rather than the Expo Go client.
+
+For iterating with live reload during development, use a development build
+(`npx expo install expo-dev-client`, then `eas build --profile development`) and
+run `npx expo start`. That is a separate install from the preview APK — keep the
+preview APK for testers and the dev build for yourself.
+
 ## Notifications
 
 When a player submits a result, the opponent's **Confirm** tab gets a badge. It
